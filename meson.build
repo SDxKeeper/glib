@@ -1831,29 +1831,20 @@ if not libz_dep.found()
   endif
 endif
 
-# First check in libc, fallback to libintl, and as last chance build
-# proxy-libintl subproject.
-# FIXME: glib-gettext.m4 has much more checks to detect broken/uncompatible
-# implementations. This could be extended if issues are found in some platforms.
-if cc.has_function('ngettext')
-  libintl = []
-  have_bind_textdomain_codeset = cc.has_function('bind_textdomain_codeset')
+# Only used on non-glibc targets
+libintl = cc.find_library('intl', required : false)
+if host_system == 'windows' and not libintl.found()
+  # Used only when the gettext library is not available (MSVC, not MinGW)
+  libintl = subproject('proxy-libintl').get_variable('intl_dep')
+  glib_conf.set('HAVE_DCGETTEXT', 1)
 else
-  libintl = cc.find_library('intl', required : false)
-  if not libintl.found()
-    libintl = subproject('proxy-libintl').get_variable('intl_dep')
-    have_bind_textdomain_codeset = true  # proxy-libintl supports it
-  else
-    have_bind_textdomain_codeset = cc.has_function('bind_textdomain_codeset',
-                                                   dependencies : libintl)
-  endif
+  glib_conf.set('HAVE_DCGETTEXT', cc.has_header_symbol('libintl.h', 'dcgettext'))
 endif
+# We require gettext to always be present
+glib_conf.set('HAVE_GETTEXT', 1)
 
 glib_conf.set('HAVE_BIND_TEXTDOMAIN_CODESET', have_bind_textdomain_codeset)
 
-# We require gettext to always be present
-glib_conf.set('HAVE_DCGETTEXT', 1)
-glib_conf.set('HAVE_GETTEXT', 1)
 
 glib_conf.set_quoted('GLIB_LOCALE_DIR', join_paths(glib_datadir, 'locale'))
 
