@@ -1010,7 +1010,7 @@ endif
 
 subdir('fam')
 # Don’t build the tests unless we can run them (either natively or in an exe wrapper)
-build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())
+build_tests = false
 if build_tests
     subdir('tests')
 endif
