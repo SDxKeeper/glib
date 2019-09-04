@@ -1843,7 +1843,7 @@ endif
 # We require gettext to always be present
 glib_conf.set('HAVE_GETTEXT', 1)
 
-glib_conf.set('HAVE_BIND_TEXTDOMAIN_CODESET', have_bind_textdomain_codeset)
+glib_conf.set('HAVE_BIND_TEXTDOMAIN_CODESET', cc.has_function('bind_textdomain_codeset',dependencies : libintl))
 
 
 glib_conf.set_quoted('GLIB_LOCALE_DIR', join_paths(glib_datadir, 'locale'))
